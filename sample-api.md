@@ -12,7 +12,7 @@
         "data": [
             {
                 "id": 1,
-                "ipeds_id": "123456",
+                "ipedsId": "123456",
                 "name": "Example University",
                 "website": "https://exampleuniversity.edu",
                 "active": true
@@ -37,14 +37,28 @@ Endpoints for managing batches of transcript uploads.
 * **Request Body:**
     ```json
     {
-        "batch_name": "Spring 2025 Transfer Applicants Batch 1"
+        "batchName": "Spring 2025 Transfer Applicants Batch 1",
+        "fileMetadata": [
+            {
+                "name": "fileName",
+                "size": 3202,
+                "type": "application/pdf",
+                "key": "ui-generated-key"
+            }
+        ]
     }
     ```
 * **Response (201 Created):**
     ```json
     {
-        "id": ...
-        ...
+        "id": 323234342342,
+        "uploadUrls": [
+            {
+                "transcriptId": 11310012
+                "key": "ui-generated-key",
+                "uploadUrl": "https://edvsrly.s3.amazonaws.com/2013031/11310012?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20250604%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250604T120000Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=abcd1234ef567890example"
+            }
+        ]
     }
     ```
 
@@ -52,30 +66,11 @@ Endpoints for managing batches of transcript uploads.
 * **Description:** Lists upload batches for an institution.
 * **Authentication:** Required.
 * **Query Parameters:** `page`, `limit`, `status`.
-* **Response (200 OK):** (Paginated list of batch objects)
+* **Response (200 OK):** (Paginated list of batch objects, where each object may contain fields like `id`, `batchName`, etc.)
 ---
 
 ### 3. Transcripts
 Endpoints related to individual transcript uploads. This includes the crucial step of getting a pre-signed URL.
-
-#### `POST /transcripts/generate-presigned-url`
-* **Description:** Generates an S3 pre-signed URL for a file to be uploaded. It also creates a `transcript_uploads` record in the database with an initial status (e.g., `pending_batch` or `uploaded`). The front-end will use this URL to upload the file directly to S3.
-* **Authentication:** Required.
-* **Request Body:**
-    ```json
-    {
-        "batch_id": 1, // Optional: if part of a batch
-        "original_file_name": "student_transcript.pdf",
-        ...
-    }
-    ```
-* **Response (200 OK):**
-    ```json
-    {
-        "upload_url": "https://edvsrly.s3.amazonaws.com/2013031/11310012?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20250604%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250604T120000Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=abcd1234ef567890example",
-    }
-    ```
-    *Note: The `transcript-processor` lambda will be triggered by the S3 upload to `storage_path`.*
 
 #### `GET /transcripts/{transcriptId}`
 * **Description:** Retrieves details of a specific transcript upload.
@@ -84,32 +79,32 @@ Endpoints related to individual transcript uploads. This includes the crucial st
     ```json
     {
         "id": 101,
-        "batch_id": 1,
-        "uploaded_by_user_id": 2,
-        "institution_id": 1,
-        "original_file_name": "student_transcript.pdf",
-        "file_type": "application/pdf",
-        "file_size_bytes": 102400,
+        "batchId": 1,
+        "uploadedByUserId": 2,
+        "institutionId": 1,
+        "originalFileName": "student_transcript.pdf",
+        "fileType": "application/pdf",
+        "fileSizeBytes": 102400,
         "status": "parsed",
-        "fidelity_score": 0.85,
-        "processed_transcript": { /* standardized transcript json format */  },
-        "evaluation_notes": null
+        "fidelityScore": 0.85,
+        "processedTranscript": { /* standardized transcript json format */  },
+        "evaluationNotes": null
     }
     ```
 
 #### `PUT /transcripts/{transcriptId}`
-* **Description:** Updates a transcript upload. This could be used by users to add notes or by the system (e.g., `transcript-processor` indirectly, or a subsequent service) to update status, processed data, etc.
+* **Description:** Updates a transcript upload. This could be used by users to add notes or by the system (e.g., `transcript-processor` indirectly, or a subsequent service) to update status, processed data, etc. The `processedTranscript` field would contain the standardized transcript data.
 * **Authentication:** Required.
 * **Request Body (Example for user adding notes):**
     ```json
     {
-        "evaluation_notes": "Student has strong grades in relevant math courses."
+        "evaluationNotes": "Student has strong grades in relevant math courses."
     }
     ```
 * **Request Body (Example for system updating after processing):**
     ```json
     {
-        "processed_transcript": { /* standardized transcript json format */ },
+        "processedTranscript": { /* standardized transcript json format */ }
     }
     ```
 * **Response (200 OK):** (The updated transcript upload object)
@@ -126,8 +121,8 @@ Endpoints for managing course definitions, primarily for the evaluating institut
 * **Request Body:**
     ```json
     {
-        "course_code": "CS101",
-        "course_title": "Introduction to Computer Science",
+        "courseCode": "CS101",
+        "courseTitle": "Introduction to Computer Science",
         "description": "Fundamentals of programming and computer science.",
         "credits": 3.00,
         "department": "Computer Science"
@@ -138,7 +133,7 @@ Endpoints for managing course definitions, primarily for the evaluating institut
 #### `GET /courses`
 * **Description:** Lists courses for an institution.
 * **Authentication:** Required.
-* **Query Parameters:** `page`, `limit`, `course_code`, `department`.
+* **Query Parameters:** `page`, `limit`, `courseCode`, `department`.
 * **Response (200 OK):** (Paginated list of course objects)
 
 #### `GET /courses/{courseId}`
@@ -149,7 +144,7 @@ Endpoints for managing course definitions, primarily for the evaluating institut
 #### `PUT /courses/{courseId}`
 * **Description:** Updates an existing course.
 * **Authentication:** Required.
-* **Request Body:** (Fields to update)
+* **Request Body:** (Fields to update, e.g., `courseTitle`, `description`)
 * **Response (200 OK):** (The updated course object)
 
 ---
@@ -159,16 +154,16 @@ Endpoints for managing course definitions, primarily for the evaluating institut
 Endpoints for managing course equivalency rules.
 
 #### `POST /course-equivalencies`
-* **Description:** Creates a new course equivalency rule.
+* **Description:** Creates a new course equivalency rule. The `sourceCourseId` refers to the ID of the course from the external institution (which should exist in a shared or referenceable courses table, identified by `sourceInstitutionId`). The `equivalentInstitutionCourseId` refers to the ID of the course at the evaluating institution.
 * **Authentication:** Required.
 * **Request Body:**
     ```json
     {
-        "source_institution_id": 2, // ID of the external institution
-        "source_course_id": 213142,    // ID of the course from the external institution (must exist in `courses` table, defined by source_institution_id)
-        "equivalent_institution_course_id": 9012300, // ID of the course at the evaluating institution
-        "mapping_type": "direct",
-        "credits_awarded": 3.00,
+        "sourceInstitutionId": 2, // ID of the external institution
+        "sourceCourseId": 213142,    // ID of the course from the external institution
+        "equivalentInstitutionCourseId": 9012300, // ID of the course at the evaluating institution
+        "mappingType": "direct",
+        "creditsAwarded": 3.00,
         "notes": "Direct transfer for Intro to CS."
     }
     ```
@@ -177,7 +172,7 @@ Endpoints for managing course equivalency rules.
 #### `GET /course-equivalencies`
 * **Description:** Lists course equivalencies for an evaluating institution.
 * **Authentication:** Required.
-* **Query Parameters:** `page`, `limit`, `source_institution_id`, `mapping_type`.
+* **Query Parameters:** `page`, `limit`, `sourceInstitutionId`, `mappingType`.
 * **Response (200 OK):** (Paginated list of equivalency objects)
 
 ---
@@ -186,18 +181,18 @@ Endpoints for managing course equivalency rules.
 
 Endpoints for defining and managing scoring rules.
 
-#### `POST scoring-rules`
-* **Description:** Creates a new scoring rule.
+#### `POST /scoring-rules`
+* **Description:** Creates a new scoring rule. The `criteria` field will contain details like `minGpa` and `requiredCourses`.
 * **Authentication:** Required.
 * **Request Body:**
     ```json
     {
-        "rule_name": "Standard STEM Applicant Rule",
+        "ruleName": "Standard STEM Applicant Rule",
         "description": "Rule for evaluating STEM applicants based on GPA and key courses.",
         "criteria": {
-            "min_gpa": 3.2,
-            "required_courses": ["MATH201", "PHYS101"],
-            "course_grade_weights": { "A": 4, "B": 3 }
+            "minGpa": 3.2,
+            "requiredCourses": ["MATH201", "PHYS101"],
+            "courseGradeWeights": { "A": 4, "B": 3 }
         }
     }
     ```
@@ -206,7 +201,7 @@ Endpoints for defining and managing scoring rules.
 ---
 
 ## Note on example standardized transcript
-```
+```json
 {
   "studentInformation": {
     "firstName": "Jane",
@@ -281,4 +276,3 @@ Endpoints for defining and managing scoring rules.
   },
   "rawExtractedText": "Full text extracted from OCR or text-based PDF for auditing..." // Optional, but useful for verification and error correction
 }
-```
