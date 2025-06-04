@@ -1,4 +1,4 @@
-### 1. Upload Batches
+### 1. Institutions
 
 #### `GET /institutions`
 * **Description:** Retrieves a list of institutions. Supports pagination.
@@ -27,7 +27,7 @@
     }
     ```
 
-### 1. Upload Batches
+### 2. Upload Batches
 
 Endpoints for managing batches of transcript uploads.
 
@@ -55,7 +55,7 @@ Endpoints for managing batches of transcript uploads.
 * **Response (200 OK):** (Paginated list of batch objects)
 ---
 
-### 2. Transcript Uploads
+### 3. Transcripts
 Endpoints related to individual transcript uploads. This includes the crucial step of getting a pre-signed URL.
 
 #### `POST /transcripts/generate-presigned-url`
@@ -116,7 +116,7 @@ Endpoints related to individual transcript uploads. This includes the crucial st
 
 ---
 
-### 3. Courses
+### 4. Courses
 
 Endpoints for managing course definitions, primarily for the evaluating institution.
 
@@ -154,7 +154,7 @@ Endpoints for managing course definitions, primarily for the evaluating institut
 
 ---
 
-### 4. Course Equivalencies
+### 5. Course Equivalencies
 
 Endpoints for managing course equivalency rules.
 
@@ -182,7 +182,7 @@ Endpoints for managing course equivalency rules.
 
 ---
 
-### 5. Scoring Rules
+### 6. Scoring Rules
 
 Endpoints for defining and managing scoring rules.
 
@@ -202,5 +202,3 @@ Endpoints for defining and managing scoring rules.
     }
     ```
 * **Response (201 Created):** (The created scoring rule object)
-
----
