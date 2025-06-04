@@ -202,3 +202,83 @@ Endpoints for defining and managing scoring rules.
     }
     ```
 * **Response (201 Created):** (The created scoring rule object)
+
+---
+
+## Note on example standardized transcript
+```
+{
+  "studentInformation": {
+    "firstName": "Jane",
+    "middleName": "Marie",
+    "lastName": "Doe",
+    "studentIdAtSource": "SID789001",
+    "dateOfBirth": "2003-07-15",
+    "contactEmail": "jane.doe@example.com", // If available
+    "contactPhone": "+1-555-0100" // If available
+  },
+  "issuingInstitution": {
+    "name": "Central State University",
+    "city": "Metropolis",
+    "state": "IL",
+    "country": "USA",
+    "accreditation": "Regionally Accredited by HLC" // If available
+  },
+  "academicTerms": [
+    {
+      "termId": "term_2022_fall",
+      "termName": "Fall Semester 2022",
+      "startDate": "2022-08-29",
+      "endDate": "2022-12-16",
+      "courses": [
+        {
+          "courseCode": "ENG101",
+          "courseTitle": "Composition I",
+          "creditsAttempted": 3.0,
+          "creditsEarned": 3.0,
+          "gradeReceived": "A-",
+          "gradePoints": 11.1, // (e.g., 3.7 grade point * 3 credits)
+          "notes": "Transfer equivalent: WRIT100"
+        },
+        {
+          "courseCode": "MATH203",
+          "courseTitle": "Calculus I",
+          "creditsAttempted": 4.0,
+          "creditsEarned": 4.0,
+          "gradeReceived": "B+",
+          "gradePoints": 13.2 // (e.g., 3.3 grade point * 4 credits)
+        }
+      ],
+      "termGpa": 3.471, // (total grade points / total credits attempted for term)
+      "termCreditsAttempted": 7.0,
+      "termCreditsEarned": 7.0,
+      "academicStatus": "Good Standing" // e.g., Dean's List, Probation
+    }
+    // ... more terms
+  ],
+  "degreeInformation": [
+    {
+      "degreeTitle": "Associate of Arts",
+      "major": "General Studies",
+      "conferralDate": "2023-05-15",
+      "honors": "cum laude"
+    }
+  ],
+  "cumulativeSummary": {
+    "gpa": 3.65,
+    "totalCreditsAttempted": 60.0,
+    "totalCreditsEarned": 57.0,
+    "classRank": null // If available
+  },
+  "transcriptLegend": [ // Key-value pairs from the transcript's grading scale
+    {"grade": "A", "description": "Excellent", "qualityPoints": 4.0},
+    {"grade": "A-", "description": "Very Good", "qualityPoints": 3.7}
+    // ... other grade mappings
+  ],
+  "additionalInformation": { // For any unstructured but potentially relevant info
+    "notes": "Student completed an international exchange program in Spring 2023.",
+    "disciplinaryActions": [] // If mentioned
+  },
+  "rawExtractedText": "Full text extracted from OCR or text-based PDF for auditing..." // Optional, but useful for verification and error correction
+}
+```
